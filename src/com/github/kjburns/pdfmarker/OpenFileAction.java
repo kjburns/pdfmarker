@@ -11,6 +11,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
 import com.sun.istack.internal.NotNull;
@@ -59,6 +61,16 @@ final class OpenFileAction extends AbstractAction
 				if (Debug.DEBUGGING) {
 					final int pageCount = doc.getNumberOfPages();
 					System.out.println(selectedFile.getName() + ": " + pageCount + " pages");
+					final PDPage page0 = doc.getPage(0);
+					final PDPage page1 = doc.getPage(1);
+					final PDPage page = page0;
+					final PDRectangle pageRectangle = page.getMediaBox();
+					System.out.println(pageRectangle.toString());
+					
+					System.out.println("Page 0 Bounds = " + page0.getMediaBox().toString() + " Rotation=" + page0.getRotation());
+					System.out.println("Page 1 Bounds = " + page1.getMediaBox().toString() + " Rotation=" + page1.getRotation());
+					
+					System.out.println("Page 0 LL x=" + page0.getMediaBox().getLowerLeftX() + " y=" + page0.getMediaBox().getLowerLeftY());
 				}
 				pdfContainer.setActivePdfDocument(doc);
 			} catch (IOException e) {
