@@ -9,7 +9,7 @@ import com.sun.istack.internal.NotNull;
  * @author Kevin J. Burns, P.E.
  *
  */
-interface HasActivePdfDocument {
+interface HasActivePdfBoxDocument {
 	/**
 	 * A listener for monitoring a pdf container's document load/unload.
 	 * @author Kevin J. Burns, P.E.
@@ -21,25 +21,25 @@ interface HasActivePdfDocument {
 		 * @param container
 		 * @param doc
 		 */
-		void loadingDocument(@NotNull HasActivePdfDocument container, @NotNull PDDocument doc);
+		void loadingDocument(@NotNull HasActivePdfBoxDocument container, @NotNull PDDocument doc);
 		/**
 		 * The specified container has loaded the specified document.
 		 * @param container
 		 * @param doc
 		 */
-		void loadedDocument(@NotNull HasActivePdfDocument container, @NotNull PDDocument doc);
+		void loadedDocument(@NotNull HasActivePdfBoxDocument container, @NotNull PDDocument doc);
 		/**
 		 * Called when the specified container will soon unload the specified document.
 		 * @param container
 		 * @param doc
 		 */
-		void unloadingDocument(@NotNull HasActivePdfDocument container, @NotNull PDDocument doc);
+		void unloadingDocument(@NotNull HasActivePdfBoxDocument container, @NotNull PDDocument doc);
 		/**
 		 * The specified container has unloaded the specified document.
 		 * @param container
 		 * @param doc
 		 */
-		void unloadedDocument(@NotNull HasActivePdfDocument container, @NotNull PDDocument doc);
+		void unloadedDocument(@NotNull HasActivePdfBoxDocument container, @NotNull PDDocument doc);
 	}
 	
 	/**
@@ -55,7 +55,7 @@ interface HasActivePdfDocument {
 		 * @param oldPage
 		 * @param newPage
 		 */
-		void currentPageChanging(@NotNull HasActivePdfDocument container, int oldPage, int newPage);
+		void currentPageChanging(@NotNull HasActivePdfBoxDocument container, int oldPage, int newPage);
 		/**
 		 * The current page of the specified pdf container has changed
 		 * from {@code oldPage} to {@code newPage}.
@@ -63,7 +63,7 @@ interface HasActivePdfDocument {
 		 * @param oldPage
 		 * @param newPage
 		 */
-		void currentPageChanged(@NotNull HasActivePdfDocument container, int oldPage, int newPage);
+		void currentPageChanged(@NotNull HasActivePdfBoxDocument container, int oldPage, int newPage);
 	}
 	
 	/**
@@ -77,12 +77,12 @@ interface HasActivePdfDocument {
 	 * If, prior to calling this method, the container already has a document loaded,
 	 * the container will notify all registered {@code PdfContainerListener}s that
 	 * the document 
-	 * {@link PdfContainerListener#unloadingDocument(HasActivePdfDocument, PDDocument) is about to be unloaded} 
-	 * and {@link PdfContainerListener#unloadedDocument(HasActivePdfDocument, PDDocument) after it's been unloaded}.
+	 * {@link PdfContainerListener#unloadingDocument(HasActivePdfBoxDocument, PDDocument) is about to be unloaded} 
+	 * and {@link PdfContainerListener#unloadedDocument(HasActivePdfBoxDocument, PDDocument) after it's been unloaded}.
 	 * Once the document has been unloaded, {@link #getActivePdfDocument_rNull()} will return {@code null}.
 	 * Then, the container will notify listeners that the new document
-	 * {@link PdfContainerListener#loadingDocument(HasActivePdfDocument, PDDocument) is about to be loaded}
-	 * and {@link PdfContainerListener#loadedDocument(HasActivePdfDocument, PDDocument) has been loaded}.
+	 * {@link PdfContainerListener#loadingDocument(HasActivePdfBoxDocument, PDDocument) is about to be loaded}
+	 * and {@link PdfContainerListener#loadedDocument(HasActivePdfBoxDocument, PDDocument) has been loaded}.
 	 * </p>
 	 * @param doc The pdf document to give to this container. 
 	 * This parameter must not be null, otherwise an IllegalArgumentException will be raised.

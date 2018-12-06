@@ -32,9 +32,9 @@ final class OpenFileAction extends AbstractAction
 
 	private static final long serialVersionUID = 7137760649854671754L;
 	
-	private final HasActivePdfDocument pdfContainer;
+	private final HasActivePdfBoxDocument pdfContainer;
 	
-	public OpenFileAction(@NotNull HasActivePdfDocument pdfContainer) {
+	public OpenFileAction(@NotNull HasActivePdfBoxDocument pdfContainer) {
 		this.pdfContainer = pdfContainer;
 		
 		putValue(SHORT_DESCRIPTION, "Open pdf");

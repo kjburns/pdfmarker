@@ -45,7 +45,7 @@ class MainWindow extends JFrame {
 		return ret;
 	}
 
-	private HasActivePdfDocument getPdfContainer() {
+	private HasActivePdfBoxDocument getPdfContainer() {
 		// TODO Auto-generated method stub
 		return null;
 	}
