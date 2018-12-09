@@ -34,7 +34,7 @@ final class PdfPageCoordinateManagerForPdfbox
 		builder = b;
 		
 		final Iterator<PDPage> it = builder.doc.getPages().iterator();
-		float maxY = 0;
+		float maxY = -builder.pageSpacing;
 		
 		while (it.hasNext()) {
 			final PDPage page = it.next();

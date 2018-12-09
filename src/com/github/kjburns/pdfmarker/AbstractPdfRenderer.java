@@ -26,7 +26,8 @@ public abstract class AbstractPdfRenderer implements PdfRenderer {
 	 * Implementors must not return {@code null}.
 	 * @return
 	 */
-	protected abstract PdfPageCoordinateManager getCoordManager();
+	@Override
+	public abstract PdfPageCoordinateManager getCoordinateManager();
 	/**
 	 * Gets the number of pages in the document
 	 * @return
@@ -41,7 +42,7 @@ public abstract class AbstractPdfRenderer implements PdfRenderer {
 
 	@Override
 	public void renderVisiblePortion(Graphics g, Rectangle2D visibleBounds) {
-		final PdfPageCoordinateManager coordManager = getCoordManager();
+		final PdfPageCoordinateManager coordManager = getCoordinateManager();
 		if (coordManager == null) {
 			throw new RuntimeException("Concrete subclass of AbstractPdfRenderer returned null CoordinateManager.");
 		}
@@ -75,7 +76,7 @@ public abstract class AbstractPdfRenderer implements PdfRenderer {
 		final int pageCount = getPageCount();
 		
 		for (int i = firstVisiblePage; i < pageCount; i++) {
-			final PdfPageRectangle coords = getCoordManager().getPageOverallCoordinates(i);
+			final PdfPageRectangle coords = getCoordinateManager().getPageOverallCoordinates(i);
 			if (coords.getTopY() > visibleBounds.getMaxY()) {
 				return i - 1;
 			}
@@ -90,7 +91,7 @@ public abstract class AbstractPdfRenderer implements PdfRenderer {
 		 * using a binary search or some such may be better. 
 		 */
 		for (int i = 0; i < getPageCount(); i++) {
-			final PdfPageRectangle coords = getCoordManager().getPageOverallCoordinates(i);
+			final PdfPageRectangle coords = getCoordinateManager().getPageOverallCoordinates(i);
 			if (coords.getBottomY() >= visibleBounds.getMinY()) {
 				return i;
 			}

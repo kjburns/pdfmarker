@@ -40,7 +40,7 @@ final class PdfRendererForPdfbox extends AbstractPdfRenderer {
 	}
 
 	@Override
-	protected PdfPageCoordinateManager getCoordManager() {
+	public PdfPageCoordinateManager getCoordinateManager() {
 		return coordManager;
 	}
 }

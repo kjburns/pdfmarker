@@ -1,10 +1,6 @@
 package com.github.kjburns.pdfmarker;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
-import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.util.prefs.BackingStoreException;
@@ -12,10 +8,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
@@ -62,38 +55,12 @@ final class OpenFileAction extends AbstractAction
 			try {
 				PDDocument doc;
 				doc = openPdf(selectedFile);
-				if (Debug.DEBUGGING) {
-					showTestWindow(doc);
-				}
 				pdfContainer.setActivePdfDocument(doc);
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(chooser, "Could not open pdf: " + selectedFile.getName());
 				e.printStackTrace();
 			}
 		}
-	}
-
-	private void showTestWindow(final PDDocument doc) {
-		JFrame win = new JFrame();
-		JPanel panel = new JPanel() {
-			private static final long serialVersionUID = 1L;
-			final PdfRenderer renderer = new PdfRendererForPdfbox(doc);
-			@Override
-			protected void paintComponent(Graphics g) {
-				final Graphics2D g2d = (Graphics2D)g;
-				final AffineTransform oldTransform = g2d.getTransform();
-				renderer.renderVisiblePortion(g, getBounds());
-				System.out.println(getBounds());
-				g2d.setTransform(oldTransform);
-			}
-		};
-		panel.setMinimumSize(new Dimension(400, 400));
-		panel.setOpaque(true);
-		win.setMinimumSize(new Dimension(612, 792));
-		win.setContentPane(panel);
-		win.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		win.pack();
-		win.setVisible(true);
 	}
 
 	private JFileChooser createFileChooser() {

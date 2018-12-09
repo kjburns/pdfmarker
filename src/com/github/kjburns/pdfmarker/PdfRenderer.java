@@ -18,4 +18,10 @@ public interface PdfRenderer {
 	 * @param bounds The visible portion in which the pdf should be drawn.
 	 */
 	void renderVisiblePortion(@NotNull Graphics g, @NotNull Rectangle2D bounds);
+	/**
+	 * Gets a coordinate manager that describes the location of each page.
+	 * Implementors must not return {@code null}.
+	 * @return
+	 */
+	PdfPageCoordinateManager getCoordinateManager();
 }
