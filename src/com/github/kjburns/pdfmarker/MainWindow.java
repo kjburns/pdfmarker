@@ -42,6 +42,7 @@ class MainWindow extends JFrame {
 	private JToolBar createTopToolbar() {
 		JToolBar ret = new JToolBar();
 		
+		ret.add(new TestAction(getPdfContainer()));
 		ret.add(new OpenFileAction(getPdfContainer()));
 		// TODO Add more toolbar buttons
 		return ret;

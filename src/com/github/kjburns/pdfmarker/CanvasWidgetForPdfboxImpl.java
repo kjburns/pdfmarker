@@ -3,14 +3,19 @@ package com.github.kjburns.pdfmarker;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 class CanvasWidgetForPdfboxImpl 
@@ -58,12 +63,58 @@ class CanvasWidgetForPdfboxImpl
 		}
 	}
 	
+	private class CurrentPageTracker
+			implements ChangeListener, PdfContainerListener {
+		private int currentPage = -1;
+		
+		@Override
+		public void loadingDocument(HasActivePdfBoxDocument container, PDDocument doc) {
+			// nothing to do here
+		}
+		@Override
+		public void loadedDocument(HasActivePdfBoxDocument container, PDDocument doc) {
+			currentPage = 0;
+		}
+
+		@Override
+		public void unloadingDocument(HasActivePdfBoxDocument container, PDDocument doc) {
+			currentPage = -1;
+		}
+
+		@Override
+		public void unloadedDocument(HasActivePdfBoxDocument container, PDDocument doc) {
+			// nothing to do here
+		}
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			if (currentPage == -1) {
+				return;
+			}
+			
+			final int newPage = getActivePdfDocumentCurrentPage();
+			if (newPage != currentPage) {
+				final Iterator<PdfContainerCurrentPageListener> it = pageListeners.iterator();
+				while (it.hasNext()) {
+					it.next().currentPageChanged(CanvasWidgetForPdfboxImpl.this, currentPage, newPage);
+				}
+				
+				currentPage = newPage;
+			}
+		}
+	}
+	
 	private List<PdfContainerListener> containerListeners = new ArrayList<>();
 	private List<PdfContainerCurrentPageListener> pageListeners = new ArrayList<>();
 	private PDDocument activeDocument = null;
 	
+	private final CurrentPageTracker pageTracker = this.new CurrentPageTracker();
 	private final JScrollPane scrollPane = createScrollPane();
 	private PdfRendererPanel renderingPanel = null;
+	
+	public CanvasWidgetForPdfboxImpl() {
+		addPdfContainerListener(pageTracker);
+	}
 	
 	@Override
 	public PDDocument getActivePdfDocument_rNull() {
@@ -76,7 +127,7 @@ class CanvasWidgetForPdfboxImpl
 		ret.getVerticalScrollBar().setUnitIncrement(40);
 		ret.getVerticalScrollBar().setBlockIncrement(200);
 
-		// TODO add listener for scrolling so page changes can be broadcast
+		ret.getViewport().addChangeListener(this.pageTracker);
 		return ret;
 	}
 
@@ -131,6 +182,7 @@ class CanvasWidgetForPdfboxImpl
 		/*
 		 * Implementing for now as brute force. If large pdfs become normal then
 		 * a less naive search, like binary search, will be more appropriate.
+		 * See Issue #1 on github.
 		 * 
 		 * The current page will be defined as the page that intersects the top of the view.
 		 */
@@ -140,7 +192,7 @@ class CanvasWidgetForPdfboxImpl
 			final float top = pageCoords.getTopY();
 			final float bottom = pageCoords.getBottomY();
 			
-			if ((top - viewTop ) * (bottom - viewTop) <= 0) {
+			if ((top - viewTop) * (bottom - viewTop) <= 0) {
 				return pageNr;
 			}
 		}
@@ -149,9 +201,34 @@ class CanvasWidgetForPdfboxImpl
 	}
 
 	@Override
-	public void setActivePdfDocumentCurrentPage(int pageNumber) {
-		// TODO Auto-generated method stub
+	public void setActivePdfDocumentCurrentPage(int newPageNumber) {
+		if (activeDocument == null) {
+			throw new IllegalStateException("Attempted to change active page when no document was open.");
+		}
+		checkPageNumber(newPageNumber);
 		
+		final int oldPageNumber = getActivePdfDocumentCurrentPage();
+		
+		final Iterator<PdfContainerCurrentPageListener> it = pageListeners.iterator();
+		while (it.hasNext()) {
+			final PdfContainerCurrentPageListener listener = it.next();
+			listener.currentPageChanging(this, oldPageNumber, newPageNumber);
+		}
+
+		final PdfPageCoordinateManager coordMgr = renderingPanel.getRenderer().getCoordinateManager();
+		final PdfPageRectangle coords = coordMgr.getPageOverallCoordinates(newPageNumber);
+		final float topY = coords.getTopY();
+		
+		final double currX = scrollPane.getViewport().getViewPosition().getX();
+		Point newPosition = new Point();
+		newPosition.setLocation(currX, topY);
+		scrollPane.getViewport().setViewPosition(newPosition);
+	}
+
+	private void checkPageNumber(int pageNumber) {
+		if (pageNumber < 0 || pageNumber >= activeDocument.getNumberOfPages()) {
+			throw new IllegalArgumentException("Requested setting pdf page to out-of-range value");
+		}
 	}
 
 	@Override

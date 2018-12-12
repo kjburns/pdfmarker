@@ -89,6 +89,7 @@ public abstract class AbstractPdfRenderer implements PdfRenderer {
 		/*
 		 * for now, using a naive search. If very large pdfs become normal then
 		 * using a binary search or some such may be better. 
+		 * See Issue #1 on github.
 		 */
 		for (int i = 0; i < getPageCount(); i++) {
 			final PdfPageRectangle coords = getCoordinateManager().getPageOverallCoordinates(i);
