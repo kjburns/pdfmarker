@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -145,6 +146,13 @@ class CanvasWidgetForPdfboxImpl
 			containerListeners.stream().forEach((l) -> {
 				l.unloadedDocument(this, oldDocument);
 			});
+			try {
+				oldDocument.close();
+			} catch (IOException e) {
+				System.err.println("Unable to close pdf.");
+				e.printStackTrace();
+				return;
+			}
 		}
 		
 		containerListeners.stream().forEach((l) -> {
