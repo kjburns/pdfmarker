@@ -4,14 +4,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 
@@ -196,9 +200,28 @@ class PdfNavigationWidget {
 			}
 		}
 		
+		private class RestoreTextAction extends AbstractAction {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -7237621688439164675L;
+			static final String ACTION_COMMAND_NAME = "restore-text";
+			
+			public RestoreTextAction() {
+				putValue(ACTION_COMMAND_KEY, ACTION_COMMAND_NAME);
+			}
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				setText(lastKnownText);
+				widget.requestFocusInWindow();
+			}
+		}
+		
 		private static final long serialVersionUID = 5054483252247101900L;
 		private boolean updatingDisplay = false;
 		private final InputVerifier inputVerifierInstance = new InputVerifierImpl();
+		private String lastKnownText = "";
 		
 		public PageNumberInput() {
 			super(3);
@@ -209,8 +232,18 @@ class PdfNavigationWidget {
 			setInputVerifier(inputVerifierInstance);
 			addActionListener(this);
 			addFocusListener(this);
+			
+			setupEscapeAction();
 		}
 		
+		private void setupEscapeAction() {
+			final InputMap inputMap = getInputMap();
+			final ActionMap actionMap = getActionMap();
+			
+			inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), RestoreTextAction.ACTION_COMMAND_NAME);
+			actionMap.put(RestoreTextAction.ACTION_COMMAND_NAME, new RestoreTextAction());
+		}
+
 		private void setPageNumber(int pageNumber) {
 			if (!updatingDisplay) {
 				pdfContainer.setActivePdfDocumentCurrentPage(pageNumber);
@@ -264,7 +297,8 @@ class PdfNavigationWidget {
 
 		@Override
 		public void focusGained(FocusEvent arg0) {
-			// nothing to do here
+			selectAll();
+			lastKnownText = getText();
 		}
 
 		@Override
