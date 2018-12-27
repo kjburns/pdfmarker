@@ -12,8 +12,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -113,6 +115,9 @@ class CanvasWidgetForPdfboxImpl
 	private final JScrollPane scrollPane = createScrollPane();
 	private PdfRendererPanel renderingPanel = null;
 	
+	private static final float FULL_PAGE_JUMP_FRACTION = 0.9f;
+	private static final float SINGLE_LINE_JUMP_FRACTION = 0.1f;
+	
 	public CanvasWidgetForPdfboxImpl() {
 		addPdfContainerListener(pageTracker);
 	}
@@ -169,6 +174,7 @@ class CanvasWidgetForPdfboxImpl
 		renderingPanel = new PdfRendererPanel(activeDocument);
 		scrollPane.setViewportView(renderingPanel);
 		renderingPanel.revalidate();
+		renderingPanel.requestFocusInWindow();
 	}
 
 	@Override
@@ -273,5 +279,71 @@ class CanvasWidgetForPdfboxImpl
 	@Override
 	public JComponent getComponent() {
 		return scrollPane;
+	}
+
+	@Override
+	public void pageUp() {
+		final JViewport viewport = scrollPane.getViewport();
+		final double visibleHeight = viewport.getVisibleRect().getHeight();
+		final double jumpDistance = visibleHeight * FULL_PAGE_JUMP_FRACTION;
+		advanceUp(jumpDistance);
+	}
+
+	@Override
+	public void pageDown() {
+		final JViewport viewport = scrollPane.getViewport();
+		final double visibleHeight = viewport.getVisibleRect().getHeight();
+		final double jumpDistance = visibleHeight * FULL_PAGE_JUMP_FRACTION;
+		advanceDown(jumpDistance);
+	}
+
+	@Override
+	public void upArrow() {
+		JOptionPane.showMessageDialog(null, "up arrow");
+		final JViewport viewport = scrollPane.getViewport();
+		final double visibleHeight = viewport.getVisibleRect().getHeight();
+		final double jumpDistance = visibleHeight * SINGLE_LINE_JUMP_FRACTION;
+		advanceUp(jumpDistance);
+	}
+	
+	private void advanceUp(double pixels) {
+		final JViewport viewport = scrollPane.getViewport();
+		final PdfPageCoordinateManager coordMgr = renderingPanel.getRenderer().getCoordinateManager();
+		final Point currentPosition = viewport.getViewPosition();
+		final Point newPosition = new Point();
+		final double newTop = Math.max(currentPosition.getY() - pixels, coordMgr.getBoundsOfDocument().getTopY());
+		newPosition.setLocation(currentPosition.getX(), newTop);
+		viewport.setViewPosition(newPosition);
+	}
+	
+	private void advanceDown(double pixels) {
+		final JViewport viewport = scrollPane.getViewport();
+		final PdfPageCoordinateManager coordMgr = renderingPanel.getRenderer().getCoordinateManager();
+		final Point currentPosition = viewport.getViewPosition();
+		final Point newPosition = new Point();
+		final double viewportHeight = viewport.getVisibleRect().getHeight();
+		final PdfPageRectangle docBounds = coordMgr.getBoundsOfDocument();
+		final double newBottom = Math.min(currentPosition.getY() + pixels + viewportHeight,	docBounds.getBottomY());
+		final double newTop = Math.max(newBottom, docBounds.getTopY());
+		newPosition.setLocation(currentPosition.getX(), newTop);
+		viewport.setViewPosition(newPosition);
+	}
+
+	@Override
+	public void downArrow() {
+		final JViewport viewport = scrollPane.getViewport();
+		final double visibleHeight = viewport.getVisibleRect().getHeight();
+		final double jumpDistance = visibleHeight * SINGLE_LINE_JUMP_FRACTION;
+		advanceDown(jumpDistance);
+	}
+
+	@Override
+	public void ctrlHome() {
+		// nothing to do--apparently JScrollPane already takes care of this
+	}
+
+	@Override
+	public void ctrlEnd() {
+		// nothing to do--apparently JScrollPane already takes care of this
 	}
 }

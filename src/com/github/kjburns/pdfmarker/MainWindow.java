@@ -42,6 +42,7 @@ class MainWindow extends JFrame {
 		contentPane.setLayout(layout);
 		
 		canvas = new CanvasWidgetForPdfboxImpl();
+		new DocumentKeyboardNavigationHarnessForMainWindow(canvas, this, canvas);
 		contentPane.add(canvas.getComponent(), BorderLayout.CENTER);
 		
 		JToolBar topToolbar = createTopToolbar();
